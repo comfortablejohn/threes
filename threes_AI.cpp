@@ -354,12 +354,11 @@ int dfs(Board &board, std::vector<std::string> move_sequence, int depthLimit) {
 // 
 // 
 
-Direction greedy_search2(Board board, int tile) {
-  // std::vector<Direction> poss_moves = getPossibleMoves(board, tile);
 
+
+Direction greedy_search2(Board board, int tile) {
   int depthLim = 2;
 
-  // Node maxNode = root;
   int maxScore = score(board);
   std::vector<Direction> originalFrontier = getPossibleMoves(board, tile);
   Direction maxD = originalFrontier[0];
@@ -384,8 +383,6 @@ Direction greedy_search2(Board board, int tile) {
         if (maxScore < top.score) {
           maxScore = top.score;
           maxD = od;
-          // std::cout << "maxNode board, move is: " << dToStr(maxNode.moveMade) << "\n";
-          // printBoard(maxNode.b);
         }
         continue;
       }
@@ -398,7 +395,6 @@ Direction greedy_search2(Board board, int tile) {
         n.depth = top.depth + 1;
         n.score = score(n.b);
         n.parent = &top;
-        // n.isRoot = false;
         ns.push(n);
       }
 
@@ -406,33 +402,6 @@ Direction greedy_search2(Board board, int tile) {
     }
   }
   return maxD;
-  // std::cout << "Printing:\n";
-  // printBoard(maxNode->b);
-  // std::cout << "Printing:\n";
-  // printBoard(maxNode->parent->b);
-  // std::cout << "Root: \n";
-  // printBoard(root.b);
-  // exit(0);
-
-  // Node *p = &maxNode;
-
-  // std::stack<Direction> moveStack;
-
-  // // while (!p->isRoot) {
-  // for (int i = 0; i < depthLim; i++) {
-  //   moveStack.push(p->moveMade);
-  //   std::cout << dToStr(p->moveMade) << "\n";
-  //   p = p->parent;
-  // }
-
-  // Direction m;
-  // while (moveStack.size() > 1) {
-  //   m = moveStack.top();
-  //   std::cout << dToStr(moveStack.top());
-  //   moveStack.pop();
-  // }
-  // std::cout << "\n";
-  // return m;
 }
 
 Direction greedy_search(Board board, int tile){
