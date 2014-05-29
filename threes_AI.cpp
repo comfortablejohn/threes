@@ -502,7 +502,7 @@ float eval(Node &n, std::pair<int, int> loc) {
   float scoreWeight = 2.0;
   // float nonZeroWeight = 2.0;
   // float distWeight = 10.0;
-  float placementWeight = 50.0;
+  float placementWeight = 100.0;
   // float 
   double eval = placementWeight*placementScore(n.b)
                 // + (double)distanceSum*distWeight
@@ -593,7 +593,7 @@ std::vector<Direction> informed(Board board, int tile) {
 Direction greedy_search2(Board board, int tile) {
   int depthLim = 8;
 
-  int maxScore = score(board);
+  // int maxScore = score(board);
   // int maxScore = eval(board)
   std::vector<Direction> originalFrontier = getPossibleMoves(board, tile);
   Direction maxD = originalFrontier[0];

@@ -27,7 +27,7 @@ int iterateMoves(Board &board,
   std::vector<Direction> poss_moves = getPossibleMoves(board, tile_num);
 
   while (poss_moves.size() > 0) {
-    // printBoard(board);
+    printBoard(board);
     // std::cout << "Possible moves: ";
     // for (Direction d : poss_moves)
       // std::cout << parse_move.find(d)->second << " ";
@@ -72,8 +72,8 @@ int iterateMoves(Board &board,
 
     std::vector<Shift> shifts = makeMove(&board, m, tile_num);
 
-    // std::cout << "Move #" << move_sequence.size() + 1 << " = " 
-              // << parse_move.find(m)->second << "\n";
+    std::cout << "Move #" << move_sequence.size() + 1 << " = " 
+              << parse_move.find(m)->second << "\n";
     move_sequence.push_back(parse_move.find(m)->second);
     tile_num++;
     if (tile_num > inputSequence.size() - 1) {
@@ -204,5 +204,18 @@ int main(int argc, char *argv[]) {
   std::cout << "Moves/sec: " 
   << std::setprecision(3) 
   << (double)(move_sequence.size())/(double)difftime(tend, tstart) << "\n";
+
+  std::ofstream outputFile;
+  outputFile.open("output.txt");
+  outputFile << "Score : " << score(board) << "\n";
+  outputFile << "Moves : " << move_sequence.size() << "  Input Size : " << inputSequence.size() << "  Time : " << difftime(tend, tstart) 
+             << "  Moves/sec : " <<  (move_sequence.size())/difftime(tend, tstart) << "\n";
+  for(int i = 0; i < move_sequence.size(); i++){
+    outputFile << move_sequence[i];
+    if(i%40==0){
+      outputFile << "\n";
+    }
+  }
+  outputFile << "\n";
   return 0;
 }
