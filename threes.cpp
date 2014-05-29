@@ -113,7 +113,7 @@ int main(int argc, char *argv[]) {
   } else {
     int c;
     opterr = 0;
-    while ((c = getopt(argc, argv, "i:mra")) != -1) {
+    while ((c = getopt(argc, argv, "i:mrat")) != -1) {
       switch(c) {
         case 'i': {
           fileName = optarg;
@@ -130,6 +130,10 @@ int main(int argc, char *argv[]) {
         case 'a': {
           playType = AI;
           break;
+        } 
+        case 't': {
+          playType = TEST;
+          break;
         }
         default: {
           return help();   
@@ -142,7 +146,7 @@ int main(int argc, char *argv[]) {
 
   std::srand(std::time(NULL));
   int endGame = -1;
-
+  std::vector<Direction> moves;
 
   switch (playType) { // play the game how user wants to
     case (MAN):
@@ -159,7 +163,14 @@ int main(int argc, char *argv[]) {
       // endGame = a_star(board, move_sequence, &maxDepth);
       // endGame = i_aStar(board, move_sequence);
       endGame = iterateMoves(board, move_sequence, AI);
+      // moves = greedy_search2(board, 0);
+      // moves = informed(board, 0);
+      for (Direction d : moves) {
+        makeMove(&board, d, tile_num++);
+      }
       break;
+    case (TEST):
+      std::cout << closestPair(board, 0, 0) << "\n";
       // return 1;
     default:
       return help();

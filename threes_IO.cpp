@@ -100,8 +100,9 @@ void printSVGFile(const Board &board) {
 }
 
 /* Print board to stdout */
-void printBoard(const Board &board) {
-  printSVGFile(board);
+void printBoard(const Board &board, bool printSVG) {
+  if (printSVG)
+    printSVGFile(board);
   for (std::vector<int> l : board) {
     for (int c : l)
       std::cout << std::setfill(' ') << std::setw(4) << c << " ";

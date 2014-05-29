@@ -354,10 +354,150 @@ int dfs(Board &board, std::vector<std::string> move_sequence, int depthLimit) {
 // 
 // 
 
+bool inBounds(int row, int col) {
+  return row < BOARD_SIZE && row >= 0 && col < BOARD_SIZE && col >= 0;
+}
 
+int closestPair(Board &b, int row_0, int col_0) {
+  std::queue<std::pair<int, int>> s;
+
+  std::vector< std::pair<int,int> > adj;
+  adj.push_back(std::pair<int, int>(-1, -1));
+  adj.push_back(std::pair<int, int>(-1, 0)); 
+  adj.push_back(std::pair<int, int>(-1, 1)); 
+  adj.push_back(std::pair<int, int>(0, -1));
+  adj.push_back(std::pair<int, int>(0, 1));
+  adj.push_back(std::pair<int, int>(1, -1));
+  adj.push_back(std::pair<int, int>(1, 0));
+  adj.push_back(std::pair<int, int>(1, 1));
+
+  std::vector< std::vector<int> > visited(BOARD_SIZE, std::vector<int>(BOARD_SIZE, 0));
+
+  int row = row_0;
+  int col = col_0;
+  // std::cout << "closest pair for: " << b[row_0][col_0] << "\n";
+  s.push(std::pair<int,int>(row_0, col_0));
+  bool isstart = true;
+  while (!s.empty()) {
+    std::pair<int,int> top = s.front(); s.pop();
+    if (!isstart) {
+      if ((b[top.first][top.second] == b[row_0][col_0] &&
+          b[top.first][top.second] != 1 && b[top.first][top.second] != 2) ||
+          (b[top.first][top.second] == 1 && b[row_0][col_0] == 2) ||
+          (b[top.first][top.second] == 2 && b[row_0][col_0] == 1)) {
+        row = top.first;
+        col = top.second;
+        break;
+      } 
+    }
+    visited[top.first][top.second] = 1;
+    for (std::pair<int, int> p : adj) {
+      std::pair<int, int> n(top.first + p.first, top.second + p.second);
+      if (inBounds(n.first, n.second) && visited[n.first][n.second] == 0) {
+        s.push(n);
+      }
+    }
+    if (isstart) isstart = false;
+  }
+  if (s.size() == 0) return BOARD_SIZE + 1;
+  // return manhattan distance row_0, col_0 -> row, col
+  // std::cout << "row, col: " << row << " " << col << "\n";
+  return abs(row_0 - row) + abs(col_0 - col);
+}
+
+float eval(Node &n) {
+  // int s = n.score;
+  // int nonZero = nonZeroTiles(n.b);
+
+  int distanceSum = 0;
+
+  for (int row = 0; row < BOARD_SIZE; row++) {
+    for (int col = 0; col < BOARD_SIZE; col++) {
+      distanceSum += closestPair(n.b, row, col);
+    }
+  }
+
+  // std::cout << distanceSum - 2.0*std::log(n.score) << "\n";
+  float scoreWeight = 2.0;
+  // float 
+  return std::max(distanceSum - scoreWeight*std::log(n.score),0.0);
+}
+
+std::vector<Direction> informed(Board board, int tile) {
+  Node root;
+  root.b = board;
+  root.score = score(board);
+  root.depth = 0;
+  root.moveMade = U;
+
+  std::vector<Direction> moves = std::vector<Direction>(inputSequence.size());
+  
+  // int depthCounter = root.depth;
+  
+  moves[0] = U;
+
+  // queue nodes, so that we pop the best one according to heuristic first
+  // order is defined in comparator in threes_Mechanics.h
+  NodeQ nq;
+  root.f = root.score;
+  // std::vector<Node *> parentNodes(inputSequence.size());
+  nq.push(root);
+
+  while (!nq.empty()) {
+    Node top = nq.top(); nq.pop();
+    moves[top.depth + tile] =  top.moveMade;
+    // parentNodes[top.depth + tile] = &top;
+    // if (top.depth + tile == inputSequence.size() -1) { // goal state
+    if (top.depth + tile == 5) {
+      std::cout << top.score << ", Tile input done: \n";
+      printBoard(top.b, false);
+      // continue;
+      break;
+    }
+
+    // if (top.depth == depthLimit) {
+
+    // }
+
+    std::vector<Direction> possMoves = getPossibleMoves(top.b, top.depth);
+
+    if (possMoves.size() == 0) {
+      continue;
+    }
+
+    for (Direction d: possMoves) {
+      Node n;
+      n.b = top.b;
+      n.moveMade = d;
+      n.depth = top.depth + 1;
+      makeMove(&n.b, d, tile + n.depth);
+      n.score = score(n.b);
+      n.f = eval(n);
+      // std::cout << n.f << "\n";
+      // n.f = n.score;
+      // n.f = 
+      nq.push(n);
+    }
+
+    // tile++;
+    if (tile > inputSequence.size()) {
+      std::cout << "Tile out of bounds\n";
+      exit(EXIT_FAILURE);
+    }
+    // std::cout << dToStr(top.moveMade);
+  }
+  std::cout << "\n ";
+
+  for (int i = 1; i < moves.size(); i++) {
+    std::cout << dToStr(moves[i]);
+  }
+
+  std::cout << "\n";
+  return moves;
+}
 
 Direction greedy_search2(Board board, int tile) {
-  int depthLim = 2;
+  int depthLim = 4;
 
   int maxScore = score(board);
   std::vector<Direction> originalFrontier = getPossibleMoves(board, tile);
@@ -372,7 +512,8 @@ Direction greedy_search2(Board board, int tile) {
     int tileID = tile;
     root.score = score(board);
     root.depth = 0;
-    std::stack<Node> ns;
+    // std::stack<Node> ns;
+    NodeQ ns;
     ns.push(root);
     while (!ns.empty()) {
       Node top = ns.top(); ns.pop();
@@ -395,6 +536,7 @@ Direction greedy_search2(Board board, int tile) {
         n.depth = top.depth + 1;
         n.score = score(n.b);
         n.parent = &top;
+        n.f = eval(n);
         ns.push(n);
       }
 

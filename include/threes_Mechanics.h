@@ -41,7 +41,7 @@ enum Direction {
 class comparator {
   bool reverse;
 public:
-  comparator(const bool & revparam=false){
+  comparator(const bool & revparam=true){
     reverse=revparam;
   }
   bool operator() (const std::pair<int,Direction>& m1, const std::pair<int, Direction>& m2) {
@@ -63,7 +63,7 @@ struct Node {
   Direction moveMade;
   Board b;
   int depth;
-  int f;
+  float f;
   int g;
   int h;
   int score;
@@ -157,4 +157,8 @@ int tileScore(int val);
 
 /* Calculate score of board, based on sum of tileScore(tileVal) */
 int score(const Board &);
+
+bool inBounds(int, int);
+int closestPair(Board &, int, int);
+
 #endif

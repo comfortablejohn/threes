@@ -14,5 +14,6 @@
  #define MAN  0
  #define RAND 1
  #define AI   2
+ #define TEST 900
 
 #endif

@@ -17,6 +17,30 @@ int main() {
   s1.string_vec.push_back(0);
   s1.string_vec.push_back(3);
 
+
+  Node n1;
+  Node n2;
+  Node n3;
+  Node n4;
+
+
+  n1.f = 990;
+  n2.f = 104;
+  n3.f = 50;
+  n4.f = 1000;
+
+  NodeQ nq;
+  nq.push(n4);
+  nq.push(n2);
+  nq.push(n1);
+  nq.push(n3);
+
+  // should print 1000, 990, 104, 50
+  while (!nq.empty()) {
+    std::cout << nq.top().f << "\n";
+    nq.pop();
+  }
+
   if (s0 < s1) {
     std::cout << "s0 < s1\n";
   } else {
@@ -34,4 +58,6 @@ int main() {
     }
     std::cout << "\n";
   }
+
+  
 }

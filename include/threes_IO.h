@@ -15,6 +15,6 @@
 void readInFile(Board *, std::vector<int> *, char *);
 
 /* Print board to stdout */
-void printBoard(const Board &);
+void printBoard(const Board &, bool printSVG=true);
 
 #endif

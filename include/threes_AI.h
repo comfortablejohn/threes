@@ -16,5 +16,6 @@ Direction greedy_search(Board, int);
 // int greedy_search(Board &, int, int);
 int a_star(Board, std::vector<std::string> &, int, int *);
 int i_aStar(Board &, std::vector<std::string> &);
+std::vector<Direction> informed(Board, int);
 
 #endif
