@@ -24,6 +24,9 @@
 #include <cmath>
 #include <ctime>
 
+#include <chrono>
+#include <thread>
+
 /** Defines **/ 
 #define EMPTY 0
 #define BOARD_SIZE 4
@@ -125,8 +128,8 @@ struct Shift {
  *******************************************************************************
 */
 
-/* add tile to board */
-void addTile(std::vector< std::vector<int> > *, std::vector<Shift> &, int);
+/* add tile to board, returns coordinates of added tile*/
+std::pair<int, int> addTile(std::vector< std::vector<int> > *, std::vector<Shift> &, int);
 
 /* 
  * check if two tiles can make a valid move (i.e add doubles, add 1 and 2

@@ -160,11 +160,12 @@ std::vector<Shift> makeMove(Board *board, Direction move, int tile) {
   
   if (shifts.size() > 0)
     addTile(board, shifts, inputSequence[tile]);
+  // std::cout << "tile: " << tile << " = " << inputSequence[tile] << "\n";
   return shifts;
 }
 
 /* add tile to board */
-void addTile(Board *board, std::vector<Shift> &shifts, int tile) {
+std::pair<int, int> addTile(Board *board, std::vector<Shift> &shifts, int tile) {
   std::sort(shifts.begin(), shifts.end());
   // Shift min_shift = getMinShift(shifts);
 
@@ -172,16 +173,23 @@ void addTile(Board *board, std::vector<Shift> &shifts, int tile) {
   int shift_id = shifts[0].id;
   // Direction shift_d = min_shift.m;
   // int shift_id = min_shift.id;
-
+  std::pair<int, int> p;
   if (shift_d == U) {
     (*board)[BOARD_SIZE - 1][shift_id] = tile;
+    p = std::pair<int, int>(BOARD_SIZE - 1, shift_id);
   } else if (shift_d == D) {
     (*board)[0][shift_id] = tile;
+    p = std::pair<int, int>(0, shift_id);
   } else if (shift_d == L) {
     (*board)[shift_id][BOARD_SIZE - 1] = tile;
+    p = std::pair<int, int>(shift_id, BOARD_SIZE - 1);
   } else {
     (*board)[shift_id][0] = tile;
+    p = std::pair<int, int>(shift_id, 0);
   }
+  // std::cout << shift_d << " " << tile << "\n";
+
+  return p;
 }
 
 /* Calculate score of tile */ 

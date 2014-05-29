@@ -405,22 +405,113 @@ int closestPair(Board &b, int row_0, int col_0) {
   return abs(row_0 - row) + abs(col_0 - col);
 }
 
-float eval(Node &n) {
-  // int s = n.score;
-  // int nonZero = nonZeroTiles(n.b);
 
-  int distanceSum = 0;
+const int sobel_y[3][3] = {
+  {1, 2, 1},
+  {0, 0, 0},
+  {-1, -2, -1}
+};
 
+const int sobel_x[3][3] = {
+  {-1, 0, 1},
+  {-2, 0, 2},
+  {-1, 0, 1}
+};
+
+/*
+  Calculate variation within board by calculating gradient
+ */
+double placementScore(Board &b) {
+
+  std::vector< std::pair<int,int> > adj;
+  adj.push_back(std::pair<int, int>(-1, -1));
+  adj.push_back(std::pair<int, int>(-1, 0)); 
+  adj.push_back(std::pair<int, int>(-1, 1)); 
+  adj.push_back(std::pair<int, int>(0, -1));
+  adj.push_back(std::pair<int, int>(0, 1));
+  adj.push_back(std::pair<int, int>(1, -1));
+  adj.push_back(std::pair<int, int>(1, 0));
+  adj.push_back(std::pair<int, int>(1, 1));
+
+  int gradient[BOARD_SIZE][BOARD_SIZE];
+  double gSum = 0.0;
+
+
+  // convolve board matrix with sobel operator kernels
   for (int row = 0; row < BOARD_SIZE; row++) {
     for (int col = 0; col < BOARD_SIZE; col++) {
-      distanceSum += closestPair(n.b, row, col);
+      int gy = 0;
+      int gx = 0;
+      for (int krow = 0; krow < 3; krow ++) {
+        for (int kcol = 0; kcol < 3; kcol++) {
+
+          if (inBounds(row + krow - 1, col + kcol - 1)) {
+            gx += sobel_x[krow][kcol]*b[row + krow - 1][col + kcol - 1];
+            gy += sobel_y[krow][kcol]*b[row + krow - 1][col + kcol - 1];
+          }
+        }
+      }
+      gradient[row][col] = std::sqrt(gx*gx + gy*gy);
+      gSum += std::log((double)gradient[row][col]);
+      // gSum += (double)gradient[row][col];
     }
   }
 
+  // for (int row = 0; row < BOARD_SIZE; row++) {
+    // for (int col = 0; col < BOARD_SIZE; col++) {
+      // std::cout << gradient[row][col] << " ";
+    // }
+    // std::cout << "\n";
+  // }
+  // std::cout << "Gsum: " << gSum << "\n";
+  return std::log(gSum);
+  // return gSum;
+}
+
+float eval(Node &n, std::pair<int, int> loc) {
+  // int s = n.score;
+  // int nonZero = nonZeroTiles(n.b);
+  // std::map<double, double> valWeights;
+  // valWeights.insert(std::pair<double, double>(1.0, 10.0));
+  // valWeights.insert(std::pair<double, double>(2.0, 10.0));
+  // valWeights.insert(std::pair<double, double>(3.0, 5.0));
+  // valWeights.insert(std::pair<double, double>(4.0, 2.5));
+  // valWeights.insert(std::pair<double, double>(6.0, 1.5));
+  // valWeights.insert(std::pair<double, double>(8.0, 1.0));
+  // valWeights.insert(std::pair<double, double>(12.0, 1.0));
+
+  // double distanceSum = 0;
+
+  // // distance between every pair
+  // for (int row = 0; row < BOARD_SIZE; row++) {
+  //   for (int col = 0; col < BOARD_SIZE; col++) {
+  //     if (valWeights.count(n.b[row][col]) > 0) 
+  //       distanceSum += valWeights.find(n.b[row][col])->second*closestPair(n.b, row, col);
+  //     else 
+  //       distanceSum += closestPair(n.b, row, col);
+  //   }
+  // }
+  
+
+  //calc distance for added tile only
+  // distanceSum += closestPair(n.b, loc.first, loc.second);
+  // if (valWeights.count(n.b[loc.first][loc.second]) > 0) {
+  //   distanceSum *= valWeights.find(n.b[loc.first][loc.second])->second;
+  // }
   // std::cout << distanceSum - 2.0*std::log(n.score) << "\n";
   float scoreWeight = 2.0;
+  // float nonZeroWeight = 2.0;
+  // float distWeight = 10.0;
+  float placementWeight = 50.0;
   // float 
-  return std::max(distanceSum - scoreWeight*std::log(n.score),0.0);
+  double eval = placementWeight*placementScore(n.b)
+                // + (double)distanceSum*distWeight
+                // - ((double)BOARD_SIZE*BOARD_SIZE - (double)nonZeroTiles(n.b)) 
+                - scoreWeight*std::log((double)n.score);
+                // - nonZeroWeight*std::log(nonZeroTiles(n.b));
+  // std::cout << eval << "\n";
+  return std::max(eval ,0.0);
+  return eval;
 }
 
 std::vector<Direction> informed(Board board, int tile) {
@@ -470,9 +561,11 @@ std::vector<Direction> informed(Board board, int tile) {
       n.b = top.b;
       n.moveMade = d;
       n.depth = top.depth + 1;
-      makeMove(&n.b, d, tile + n.depth);
+      std::vector<Shift> shifts = makeMove(&n.b, d, tile + n.depth);
+      Board bb = n.b;
+      std::pair<int, int> loc = addTile(&bb, shifts, inputSequence[tile + n.depth]);
       n.score = score(n.b);
-      n.f = eval(n);
+      n.f = eval(n, loc);
       // std::cout << n.f << "\n";
       // n.f = n.score;
       // n.f = 
@@ -496,52 +589,77 @@ std::vector<Direction> informed(Board board, int tile) {
   return moves;
 }
 
+
 Direction greedy_search2(Board board, int tile) {
-  int depthLim = 4;
+  int depthLim = 8;
 
   int maxScore = score(board);
+  // int maxScore = eval(board)
   std::vector<Direction> originalFrontier = getPossibleMoves(board, tile);
   Direction maxD = originalFrontier[0];
-  
+  int minF = 1e9;
   if (originalFrontier.size() == 1) return maxD; // no point doing dfs
-
+  // int maxScore = 1e6;
   for (Direction od : originalFrontier) {
     Node root;
     root.b = board;
     makeMove(&root.b, od, tile);
-    int tileID = tile;
+    // int tileID = tile + 1;
     root.score = score(board);
-    root.depth = 0;
+    root.depth = tile;
     // std::stack<Node> ns;
     NodeQ ns;
     ns.push(root);
     while (!ns.empty()) {
       Node top = ns.top(); ns.pop();
 
-      std::vector<Direction> possMoves = getPossibleMoves(top.b, tileID);
+      std::vector<Direction> possMoves = getPossibleMoves(top.b, top.depth + 1);
+      if (possMoves.size() == 0) {
+        // if (top.depth - tile == depthLim
+            // && top.depth < inputSequence.size() - 1) {
+          // ns.pop();
+          // depthLim++;
+        // }
+        continue;
+      }
 
-      if (top.depth == depthLim) {
-        if (maxScore < top.score) {
-          maxScore = top.score;
+      // if () continue;
+      if (top.depth >= inputSequence.size() - 1 || top.depth - tile == depthLim) {
+        // if (maxScore < top.score) {
+          // maxScore = top.score;
+        if (minF >= top.f) {
           maxD = od;
+          minF = top.f;          
+          // break;
+          // continue;
         }
         continue;
       }
+      if (possMoves.size() == 0) continue;
       for (Direction d : possMoves) {
         Node n;
         n.b = top.b;
-        makeMove(&n.b, d, tileID);
 
+        // std::pair<int, int> loc = std::pair<int, int>(0,0);
         n.moveMade = d;
         n.depth = top.depth + 1;
         n.score = score(n.b);
         n.parent = &top;
-        n.f = eval(n);
+        std::vector<Shift> shifts = makeMove(&n.b, d, n.depth);
+        Board bb = n.b;
+        if (n.depth > inputSequence.size()) {
+          std::cout << "TileID greater than input length\n";
+          exit(EXIT_FAILURE);
+        }
+        std::pair<int, int> loc = addTile(&bb, shifts, inputSequence[n.depth]);
+        n.f = eval(n, loc);
         ns.push(n);
+        if (n.f < top.f) break;
       }
 
-      tileID++;
+      // tileID++;
     }
+    // tile++;
   }
   return maxD;
 }

@@ -27,11 +27,11 @@ int iterateMoves(Board &board,
   std::vector<Direction> poss_moves = getPossibleMoves(board, tile_num);
 
   while (poss_moves.size() > 0) {
-    printBoard(board);
-    std::cout << "Possible moves: ";
-    for (Direction d : poss_moves)
-      std::cout << parse_move.find(d)->second << " ";
-    std::cout << "\n";
+    // printBoard(board);
+    // std::cout << "Possible moves: ";
+    // for (Direction d : poss_moves)
+      // std::cout << parse_move.find(d)->second << " ";
+    // std::cout << "\n";
     Direction m;
 
     std::string move;
@@ -61,6 +61,7 @@ int iterateMoves(Board &board,
       }
       case AI:{
         m = greedy_search2(board,tile_num);
+        // std::cout << inputSequence[tile_num] << " ";
         break;
       }
       default: {
@@ -71,8 +72,8 @@ int iterateMoves(Board &board,
 
     std::vector<Shift> shifts = makeMove(&board, m, tile_num);
 
-    std::cout << "Move #" << move_sequence.size() + 1 << " = " 
-              << parse_move.find(m)->second << "\n";
+    // std::cout << "Move #" << move_sequence.size() + 1 << " = " 
+              // << parse_move.find(m)->second << "\n";
     move_sequence.push_back(parse_move.find(m)->second);
     tile_num++;
     if (tile_num > inputSequence.size() - 1) {
@@ -101,6 +102,9 @@ int help() {
  *     -a: AI move selection
  */
 int main(int argc, char *argv[]) {
+  time_t tstart, tend;
+  
+  tstart = time(0);
 
   Board board (BOARD_SIZE, std::vector<int>(BOARD_SIZE, EMPTY));
   std::vector<std::string> move_sequence;
@@ -143,7 +147,6 @@ int main(int argc, char *argv[]) {
   }
 
   readInFile(&board, &inputSequence, fileName);
-
   std::srand(std::time(NULL));
   int endGame = -1;
   std::vector<Direction> moves;
@@ -195,5 +198,11 @@ int main(int argc, char *argv[]) {
     std::cout << m;
   std::cout << "\n";
 
+  tend=time(0);
+  std::cout << "Time used: " << difftime(tend, tstart) << "\n";
+  std::cout << "Number of moves: " << move_sequence.size() << "\n";
+  std::cout << "Moves/sec: " 
+  << std::setprecision(3) 
+  << (double)(move_sequence.size())/(double)difftime(tend, tstart) << "\n";
   return 0;
 }
