@@ -1,4 +1,7 @@
 #include <threes_Mechanics.h>
+#include <threes_IO.h>
+#include <threes_AI.h>
+#include <threes.h>
 
 int main() {
   Direction d = D;
@@ -58,6 +61,8 @@ int main() {
     }
     std::cout << "\n";
   }
-
-  
+  Board board (BOARD_SIZE, std::vector<int>(BOARD_SIZE, EMPTY));
+   char * fileName = "./in/boardprint";
+  readInFile(&board, &inputSequence, fileName);
+  printBoard(board, true);
 }

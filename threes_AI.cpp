@@ -593,7 +593,7 @@ std::vector<Direction> informed(Board board, int tile) {
 Direction greedy_search2(Board board, int tile) {
   int depthLim = 8;
 
-  // int maxScore = score(board);
+  int maxScore = score(board);
   // int maxScore = eval(board)
   std::vector<Direction> originalFrontier = getPossibleMoves(board, tile);
   Direction maxD = originalFrontier[0];
@@ -614,28 +614,34 @@ Direction greedy_search2(Board board, int tile) {
       Node top = ns.top(); ns.pop();
 
       std::vector<Direction> possMoves = getPossibleMoves(top.b, top.depth + 1);
-      if (possMoves.size() == 0) {
-        // if (top.depth - tile == depthLim
-            // && top.depth < inputSequence.size() - 1) {
-          // ns.pop();
-          // depthLim++;
-        // }
+
+      // there is simpler logic for the following abomination of if statements,
+      // but i can't think properly.
+      // 
+      // basically just want to not look at a node if it has no more moves, 
+      // unless it is the final tile (then we don't care if there's no more moves
+      // , we just want the highest score).
+      if (possMoves.size() == 0 && top.depth < inputSequence.size() - 1) {
         continue;
       }
-
-      // if () continue;
       if (top.depth >= inputSequence.size() - 1 || top.depth - tile == depthLim) {
         // if (maxScore < top.score) {
           // maxScore = top.score;
-        if (minF >= top.f) {
+        if (top.depth >= inputSequence.size() - 1) {
+          if (maxScore < top.score) {
+            maxD = od;
+            maxScore = top.score;
+          }
+        } else if (minF >= top.f) {
           maxD = od;
-          minF = top.f;          
+          minF = top.f;   
           // break;
           // continue;
-        }
+        } 
         continue;
       }
       if (possMoves.size() == 0) continue;
+
       for (Direction d : possMoves) {
         Node n;
         n.b = top.b;

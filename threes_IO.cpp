@@ -45,6 +45,17 @@ void readInFile(Board *board, std::vector<int> *inputSequence, char *file_name) 
   }
 }
 
+int numDigits(int number)
+{
+    int digits = 0;
+    if (number < 0) digits = 1; // remove this line if '-' counts as a digit
+    while (number) {
+        number /= 10;
+        digits++;
+    }
+    return digits;
+}
+
 int MOVE_NUM = 0;
 void printSVGFile(const Board &board) {
   std::string SVG_DIR = "./SVGs";
@@ -88,7 +99,7 @@ void printSVGFile(const Board &board) {
       outFile << xPos << "," << yPos;
       outFile <<"\" style=\"fill:" << rgb << "stroke:rgb(0,0,0);stroke-width:2\"/>\n";
       if (val > 0) {
-        outFile << "<text x=\"" << xPos + 40.0 << "\" y=\"" << yPos + 65.0 << "\"";
+        outFile << "<text x=\"" << xPos + 40.0 - 10.0*numDigits(val) << "\" y=\"" << yPos + 65.0 << "\"";
         outFile << " font-family=\"Verdana\" font-size=\"40\" fill=\"black\">\n";
         outFile << val << "</text>\n";
       }
